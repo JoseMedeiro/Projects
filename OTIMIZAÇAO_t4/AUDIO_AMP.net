@@ -1,0 +1,52 @@
+*
+* NGSPICE simulation script
+* T3
+*
+
+.include AUDIO_AMP.cir
+
+.control
+
+*makes plots in color
+set hcopypscolor=0
+set color0=white
+set color1=black
+set color2=red
+set color3=blue
+set color4=violet
+set color5=rgb:3/8/0
+set color6=rgb:4/0/0
+
+
+echo "********************************************"
+
+echo "********************************************"
+
+op
+let check_1 	= v(coll)-v(base)
+let check_2 	= v(coll)
+
+write AUDIO_AMP_DC.raw check_1 check_2
+
+* transient analysis
+tran 1e-5 1e-2
+
+write AUDIO_AMP_TRANS.raw v(out) v(in) 1k
+
+* frequency analysis
+ac dec 10 10 100MEG
+
+let lower_bond 	= vecmax(vdb(out))-3
+
+meas ac f1 WHEN vdb(out)=lower_bond RISE=1
+meas ac f2 WHEN vdb(out)=lower_bond CROSS=LAST
+
+
+write AUDIO_AMP_AC.raw v(out) f1 f2
+
+
+quit
+
+.endc
+.end
+
